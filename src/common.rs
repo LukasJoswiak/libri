@@ -33,20 +33,6 @@ pub fn find_books(path: &Path) -> Result<Vec<PathBuf>, Box<dyn Error>> {
 /// Copies the file at `from` to `to`.
 ///
 /// If `to` already exists, it will be overwritten.
-///
-/// # Examples
-///
-/// ```
-/// use std::io;
-/// use libri::common;
-/// use std::path::{Path, PathBuf};
-///
-/// # fn main() -> io::Result<()> {
-/// let from = Path::new("./foo/bar.txt");
-/// common::copy(&from, &PathBuf::from("baz.txt").as_path())?;
-/// # Ok(())
-/// # }
-/// ```
 pub fn copy(from: &Path, to: &Path) -> io::Result<()> {
     fs::copy(from, to)?;
     Ok(())
@@ -70,21 +56,19 @@ pub fn sanitize(path: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
-
     use crate::common;
 
     #[test]
     fn sanitize_clean_path() {
-        let mut path = PathBuf::from("/foo/bar.txt");
-        common::sanitize(&mut path);
-        assert_eq!(path, PathBuf::from("/foo/bar.txt"));
+        let path = "/foo/bar.txt";
+        let sanitized_path = common::sanitize(&path);
+        assert_eq!(sanitized_path, path);
     }
 
     #[test]
     fn sanitize_dirty_path() {
-        let mut path = PathBuf::from("/foo:bar.txt");
-        common::sanitize(&mut path);
-        assert_eq!(path, PathBuf::from("/foo_bar.txt"));
+        let path = "/foo:bar.txt";
+        let sanitized_path = common::sanitize(&path);
+        assert_eq!(sanitized_path, "/foo_bar.txt");
     }
 }
