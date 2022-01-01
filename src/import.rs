@@ -14,12 +14,14 @@ pub fn run(config: &config::Config, path: &Path) -> Result<(), Box<dyn Error>> {
             Err(e) => return Err(e),
         };
 
+        let author = common::sanitize(&ebook.author);
+        let title = common::sanitize(&ebook.title);
+
         // TODO: Ignore any already imported books.
         let mut destination = config.library.clone();
-        destination.push(format!("{}/{}", ebook.author, ebook.title));
+        destination.push(format!("{}/{}", author, title));
         fs::create_dir_all(&destination)?;
-        destination.push(format!("{}.epub", ebook.title));
-        common::sanitize(&mut destination);
+        destination.push(format!("{}.epub", title));
         common::copy(&ebook.path, &destination)?;
         println!("imported \"{}\"", ebook.title);
     }

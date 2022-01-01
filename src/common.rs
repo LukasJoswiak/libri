@@ -52,9 +52,20 @@ pub fn copy(from: &Path, to: &Path) -> io::Result<()> {
     Ok(())
 }
 
-/// Modifies the given path to contain only file-system safe characters.
-pub fn sanitize(_path: &mut PathBuf) {
-    // TODO: Implement
+/// Returns a modified path containing only file-system safe characters.
+pub fn sanitize(path: &str) -> String {
+    // TODO: Improve the implementation by modifying the path in-place
+    let path = path.as_bytes();
+    let mut out: Vec<u8> = Vec::with_capacity(path.len());
+    for i in 0..path.len() {
+        // TODO: Sanitize all problem characters
+        if path[i] == b':' {
+            out.push(b'_');
+        } else {
+            out.push(path[i]);
+        }
+    }
+    String::from_utf8(out).expect("invalid path")
 }
 
 #[cfg(test)]
