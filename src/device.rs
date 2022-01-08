@@ -3,9 +3,9 @@ use std::io;
 use std::path::PathBuf;
 use std::process::Command;
 
-use xml::reader::{self, XmlEvent};
 #[cfg(target_os = "macos")]
 use xml::reader::EventReader;
+use xml::reader::{self, XmlEvent};
 
 /// Low-level information about a mounted USB device.
 #[derive(Debug)]
@@ -107,6 +107,17 @@ fn mounted_devices(data: &[u8]) -> Result<Vec<UsbDevice>, Box<dyn Error>> {
                         let vendor_id = u16::from_str_radix(value, 16)?;
                         devices.last_mut().unwrap().vendor_id = vendor_id;
                     } else if s == "product_id" {
+                        // TODO: Need a better way to check whether this "iteration" has a device.
+                        // Should probably switch to using a reference to the device, and reset it
+                        // when all the data has been populated.
+                        // Handles an edge case where a device is plugged in but not mounted. In
+                        // this case, there will be no "mount_point" key-value pair, but the device
+                        // will still show up under the "Media" header and will still have a vendor
+                        // and product ID.
+                        if devices.len() == 0 || devices.last().unwrap().product_id != 0 {
+                            search_depth = None;
+                            continue;
+                        }
                         let value = get_value(&mut iter)?;
                         let value = value.trim_start_matches("0x");
                         let product_id = u16::from_str_radix(value, 16)?;
@@ -198,4 +209,6 @@ mod tests {
         assert_eq!(device.vendor_id, 0x4321);
         assert_eq!(device.product_id, 0x1234);
     }
+
+    // TODO: Add a unit test where `mount_point` doesn't exist
 }
