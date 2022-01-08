@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use xml::reader;
+use xml::reader::{self, XmlEvent};
 
 #[derive(PartialEq, Debug)]
 pub struct XmlDocument {
@@ -32,14 +32,14 @@ pub fn parse(data: &str) -> reader::Result<XmlDocument> {
     for event in xml::reader::EventReader::from_str(data) {
         if let Ok(ev) = event {
             match ev {
-                xml::reader::XmlEvent::StartDocument {
+                XmlEvent::StartDocument {
                     version: _,
                     encoding,
                     standalone: _,
                 } => {
                     document.encoding = encoding;
                 }
-                xml::reader::XmlEvent::StartElement {
+                XmlEvent::StartElement {
                     name,
                     attributes,
                     namespace: _,
@@ -55,7 +55,7 @@ pub fn parse(data: &str) -> reader::Result<XmlDocument> {
                         content: String::new(),
                     });
                 }
-                xml::reader::XmlEvent::Characters(c) => {
+                XmlEvent::Characters(c) => {
                     if let Some(element) = document.elements.last_mut() {
                         element.content = c;
                     }

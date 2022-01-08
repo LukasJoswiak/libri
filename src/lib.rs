@@ -7,6 +7,7 @@ mod format;
 mod xml;
 
 pub mod config;
+pub mod device;
 pub mod import;
 pub mod list;
 

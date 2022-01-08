@@ -70,19 +70,19 @@ pub fn sanitize(path: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::common;
+    use super::*;
 
     #[test]
     fn sanitize_clean_path() {
         let path = "/foo/bar.txt";
-        let sanitized_path = common::sanitize(&path);
+        let sanitized_path = sanitize(&path);
         assert_eq!(sanitized_path, path);
     }
 
     #[test]
     fn sanitize_dirty_path() {
         let path = "/foo:bar.txt";
-        let sanitized_path = common::sanitize(&path);
+        let sanitized_path = sanitize(&path);
         assert_eq!(sanitized_path, "/foo_bar.txt");
     }
 }

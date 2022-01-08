@@ -25,6 +25,5 @@ pub fn run(config: &config::Config, path: &Path) -> Result<(), Box<dyn Error>> {
         common::copy(&ebook.path, &destination)?;
         println!("imported \"{}\"", ebook.title);
     }
-
     Ok(())
 }
