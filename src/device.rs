@@ -183,7 +183,7 @@ mod tests {
 
     #[test]
     #[cfg(target_os = "macos")]
-    fn parse_value() {
+    fn parse_system_profiler() {
         let xml_str = "<dict> \
             <key>Media</key> \
             <array> \
@@ -210,5 +210,27 @@ mod tests {
         assert_eq!(device.product_id, 0x1234);
     }
 
-    // TODO: Add a unit test where `mount_point` doesn't exist
+    #[test]
+    #[cfg(target_os = "macos")]
+    fn parse_unmounted_system_profiler() {
+        let xml_str = "<dict> \
+            <key>Media</key> \
+            <array> \
+                <dict> \
+                    <array> \
+                        <dict> \
+                            <key>_name</key>
+                            <string>Device Name</string>
+                        </dict> \
+                    </array> \
+                </dict> \
+            </array> \
+            <key>product_id</key> \
+            <string>0x1234</string> \
+            <key>vendor_id</key> \
+            <string>0x4321  (Company Name)</string> \
+          </dict>";
+        let devices = mounted_devices(xml_str.as_bytes()).unwrap();
+        assert_eq!(devices.len(), 0);
+    }
 }
