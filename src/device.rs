@@ -3,7 +3,9 @@ use std::io;
 use std::path::PathBuf;
 use std::process::Command;
 
-use xml::reader::{self, EventReader, XmlEvent};
+use xml::reader::{self, XmlEvent};
+#[cfg(target_os = "macos")]
+use xml::reader::EventReader;
 
 /// Low-level information about a mounted USB device.
 #[derive(Debug)]
@@ -124,14 +126,14 @@ fn mounted_devices(data: &[u8]) -> Result<Vec<UsbDevice>, Box<dyn Error>> {
 
 /// Returns a list of mounted devices.
 #[cfg(target_os = "linux")]
-fn mounted_devices(data: &[u8]) -> Result<Vec<UsbDevice>, Box<dyn Error>> {
+fn mounted_devices(_data: &[u8]) -> Result<Vec<UsbDevice>, Box<dyn Error>> {
     // TODO: Implement
     panic!("device recognition not yet implemented for Linux");
 }
 
 /// Returns a list of mounted devices.
 #[cfg(target_os = "windows")]
-fn mounted_devices(data: &[u8]) -> Result<Vec<UsbDevice>, Box<dyn Error>> {
+fn mounted_devices(_data: &[u8]) -> Result<Vec<UsbDevice>, Box<dyn Error>> {
     // TODO: Implement
     panic!("device recognition not yet implemented for Windows");
 }
@@ -169,6 +171,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[cfg(target_os = "macos")]
     fn parse_value() {
         let xml_str = "<dict> \
             <key>Media</key> \
