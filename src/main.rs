@@ -22,10 +22,11 @@ enum SubCommand {
 #[derive(Parser)]
 struct Config {}
 
-/// Import new books
+/// Import new ebooks
 #[derive(Parser)]
 struct Import {
     /// Path to import dir
+    #[clap(short, long)]
     path: String,
 }
 
