@@ -1,9 +1,13 @@
+mod kobo;
+mod usb;
+
 use std::error::Error;
-use std::fmt;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use kobo::{Libra2, KOBO_VENDOR_ID, LIBRA_2_PRODUCT_ID};
+use usb::UsbDevice;
 #[cfg(target_os = "macos")]
 use xml::reader::EventReader;
 use xml::reader::{self, XmlEvent};
@@ -26,48 +30,6 @@ impl Device {
 
     pub fn upload_ebook(&self, ebook: &Path) {
         self.usb_info.upload_ebook(&ebook);
-    }
-}
-
-/// Types that implement this trait represent physical USB eReader hardware connected to the computer.
-pub trait UsbDevice {
-    /// Returns the vendor ID of the USB device.
-    fn vendor_id(&self) -> u16;
-    /// Returns the product ID of the USB device.
-    fn product_id(&self) -> u16;
-
-    /// Uploads the specified ebook to the correct location on the device such that it will be
-    /// recognized automatically.
-    fn upload_ebook(&self, ebook: &Path);
-}
-
-impl fmt::Debug for dyn UsbDevice {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("dyn UsbDevice")
-            .field("vendor_id", &self.vendor_id())
-            .field("product_id", &self.product_id())
-            .finish()
-    }
-}
-
-// TODO: Device specific configuration should be moved to a separate file
-const KOBO_VENDOR_ID: u16 = 0x2237;
-const LIBRA_2_PRODUCT_ID: u16 = 0x4234;
-
-struct Libra2 {}
-
-impl UsbDevice for Libra2 {
-    fn vendor_id(&self) -> u16 {
-        KOBO_VENDOR_ID
-    }
-
-    fn product_id(&self) -> u16 {
-        LIBRA_2_PRODUCT_ID
-    }
-
-    fn upload_ebook(&self, ebook: &Path) {
-        // TODO: Implement
-        println!("sending {:?} to Libra 2", ebook);
     }
 }
 
