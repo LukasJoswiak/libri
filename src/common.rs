@@ -18,9 +18,10 @@ fn visit_dirs(dir: &Path, cb: &mut dyn FnMut(&DirEntry)) -> io::Result<()> {
     Ok(())
 }
 
-pub fn find_books(path: &Path) -> Result<Vec<PathBuf>, Box<dyn Error>> {
+/// Returns a vector of paths to ebooks read from the given directory (recursively).
+pub fn find_ebooks(search_dir: &Path) -> Result<Vec<PathBuf>, Box<dyn Error>> {
     let mut ebook_paths: Vec<PathBuf> = Vec::new();
-    visit_dirs(path, &mut |entry| {
+    visit_dirs(search_dir, &mut |entry| {
         if let Some(extension) = entry.path().extension() {
             if extension == "epub" {
                 ebook_paths.push(entry.path());

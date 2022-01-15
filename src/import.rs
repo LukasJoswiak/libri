@@ -7,7 +7,7 @@ use crate::config;
 use crate::format::epub;
 
 pub fn run(config: &config::Config, path: &Path) -> Result<(), Box<dyn Error>> {
-    let ebook_paths = common::find_books(&path)?;
+    let ebook_paths = common::find_ebooks(&path)?;
     for path in ebook_paths {
         let ebook = match epub::parse(path.as_path()) {
             Ok(ebook) => ebook,
