@@ -18,7 +18,7 @@ $ tree ~/Desktop/ebooks  # a collection of ebooks downloaded from gutenberg.org
 $ libri config
 Config { library: "/Users/lukasjoswiak/Documents/books/" }
 
-$ libri import --path ~/Desktop/ebooks/
+$ libri import ~/Desktop/ebooks/
 imported "Dracula"
 imported "Great Expectations"
 imported "The Great Gatsby"

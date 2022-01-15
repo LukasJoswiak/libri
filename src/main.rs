@@ -26,7 +26,6 @@ struct Config {}
 #[derive(Parser)]
 struct Import {
     /// Path to import dir
-    #[clap(short, long)]
     path: String,
 }
 
