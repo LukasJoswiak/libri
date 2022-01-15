@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 use std::error::Error;
+use std::io::{self, Write};
 use std::path::Path;
+
+use tabwriter::TabWriter;
 
 use crate::common;
 use crate::config;
@@ -26,9 +29,14 @@ pub fn get_books(path: &Path) -> Result<HashMap<String, Vec<String>>, Box<dyn Er
 pub fn run(config: &config::Config) -> Result<(), Box<dyn Error>> {
     let ebooks = get_books(&config.library)?;
 
-    // TODO: Sort alphabetically by author, then by title
-    for (author, title) in ebooks {
-        println!("{}\n  {}", author, title.join("\n  "));
+    let mut tw = TabWriter::new(io::stdout());
+    write!(&mut tw, "Title\tAuthor\n").unwrap();
+    // TODO: Sort by date added
+    for (author, titles) in ebooks {
+        for title in titles {
+            write!(&mut tw, "{}\t{}\n", title, author).unwrap();
+        }
     }
+    tw.flush().unwrap();
     Ok(())
 }
