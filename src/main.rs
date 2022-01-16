@@ -35,7 +35,20 @@ struct List {}
 
 /// Manage hardware devices and their content
 #[derive(Parser)]
-struct Device {}
+struct Device {
+    #[clap(subcommand)]
+    subcmd: DeviceSubCommand,
+}
+
+#[derive(Parser)]
+enum DeviceSubCommand {
+    #[clap(name = "list")]
+    DeviceList(DeviceList),
+}
+
+/// List connected eReaders supported by libri
+#[derive(Parser)]
+struct DeviceList {}
 
 fn main() -> Result<(), Box<dyn Error>> {
     let opts: Opts = Opts::parse();
@@ -43,7 +56,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     match opts.subcmd {
         SubCommand::Config(_c) => libri::config::run(&config),
-        SubCommand::Device(_d) => libri::device::run()?,
+        SubCommand::Device(d) => match d.subcmd {
+            DeviceSubCommand::DeviceList(_l) => libri::device::list::run()?,
+        },
         SubCommand::Import(i) => libri::import::run(&config, &Path::new(&i.path))?,
         SubCommand::List(_l) => libri::list::run(&config)?,
     }

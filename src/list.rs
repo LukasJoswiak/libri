@@ -28,7 +28,7 @@ pub fn run(config: &config::Config) -> Result<(), Box<dyn Error>> {
     let ebooks = get_ebooks(&config.library)?;
 
     let mut tw = TabWriter::new(io::stdout());
-    write!(&mut tw, "Title\tAuthor\n").unwrap();
+    write!(&mut tw, "\x1b[1mTitle\tAuthor\x1b[0m\n").unwrap();
     // TODO: Sort by date added
     for ebook in ebooks {
         write!(&mut tw, "{}\t{}\n", ebook.title, ebook.author).unwrap();

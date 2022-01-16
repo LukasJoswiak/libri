@@ -1,4 +1,5 @@
 mod kobo;
+pub mod list;
 mod usb;
 
 use std::error::Error;
@@ -41,6 +42,29 @@ pub struct MountedDevice {
     name: String,
     vendor_id: u16,
     product_id: u16,
+}
+
+/// Returns a list of mounted devices.
+pub fn mounted_devices() -> Result<Vec<MountedDevice>, Box<dyn Error>> {
+    let output = if cfg!(target_os = "macos") {
+        // Parse the output of `system_profiler SPUSBDataType -xml` to read the mount point of each
+        // USB device, as well as its vendor and product ID.
+        Command::new("system_profiler")
+            .arg("SPUSBDataType")
+            .arg("-xml")
+            .output()
+            .expect("failed to execute system_profiler")
+            .stdout
+    } else if cfg!(target_os = "linux") {
+        // TODO: Implement
+        vec![]
+    } else if cfg!(target_os = "windows") {
+        // TODO: Implement
+        vec![]
+    } else {
+        vec![]
+    };
+    os_mounted_devices(&output)
 }
 
 /// Returns the contents of the value associated with a key in an XML dictionary. Pass an iterator
@@ -86,7 +110,7 @@ pub fn get_value<R: io::Read>(iter: &mut reader::Events<R>) -> Result<String, re
 
 /// Returns a list of mounted devices (macOS specific).
 #[cfg(target_os = "macos")]
-fn mounted_devices(data: &[u8]) -> Result<Vec<MountedDevice>, Box<dyn Error>> {
+fn os_mounted_devices(data: &[u8]) -> Result<Vec<MountedDevice>, Box<dyn Error>> {
     let mut depth = 0;
     let mut search_depth: Option<usize> = None;
     let mut device: Option<MountedDevice> = None;
@@ -159,24 +183,23 @@ fn mounted_devices(data: &[u8]) -> Result<Vec<MountedDevice>, Box<dyn Error>> {
     Ok(devices)
 }
 
-/// Returns a list of mounted devices.
+/// Returns a list of mounted devices (Linux specific).
 #[cfg(target_os = "linux")]
-fn mounted_devices(_data: &[u8]) -> Result<Vec<MountedDevice>, Box<dyn Error>> {
+fn os_mounted_devices(_data: &[u8]) -> Result<Vec<MountedDevice>, Box<dyn Error>> {
     // TODO: Implement
     panic!("device recognition not yet implemented for Linux");
 }
 
-/// Returns a list of mounted devices.
+/// Returns a list of mounted devices (Windows specific).
 #[cfg(target_os = "windows")]
-fn mounted_devices(_data: &[u8]) -> Result<Vec<MountedDevice>, Box<dyn Error>> {
+fn os_mounted_devices(_data: &[u8]) -> Result<Vec<MountedDevice>, Box<dyn Error>> {
     // TODO: Implement
     panic!("device recognition not yet implemented for Windows");
 }
 
 // TODO: Add support for other OS's (the BSDs)
 
-/// Filters the list of mounted devices and returns a list of eReaders that support uploading of
-/// ebooks.
+/// Filters the list of mounted devices and returns a list of supported eReaders.
 fn filter(devices: Vec<MountedDevice>) -> Vec<Device> {
     let mut available_devices: Vec<Device> = Vec::new();
     for device in devices {
@@ -192,35 +215,6 @@ fn filter(devices: Vec<MountedDevice>) -> Vec<Device> {
         }
     }
     available_devices
-}
-
-pub fn run() -> Result<(), Box<dyn Error>> {
-    // Parse the output of `system_profiler SPUSBDataType -xml` to read the mount point of each USB
-    // device, as well as its vendor and product ID.
-    let output = if cfg!(target_os = "macos") {
-        Command::new("system_profiler")
-            .arg("SPUSBDataType")
-            .arg("-xml")
-            .output()
-            .expect("failed to execute system_profiler")
-            .stdout
-    } else if cfg!(target_os = "linux") {
-        // TODO: Implement
-        vec![]
-    } else if cfg!(target_os = "windows") {
-        // TODO: Implement
-        vec![]
-    } else {
-        vec![]
-    };
-
-    let devices = mounted_devices(&output)?;
-    let available_devices = filter(devices);
-    available_devices
-        .iter()
-        .for_each(|device| device.upload_ebook(&PathBuf::from("")));
-
-    Ok(())
 }
 
 #[cfg(test)]
@@ -251,7 +245,7 @@ mod tests {
             <key>vendor_id</key> \
             <string>0x4321  (Company Name)</string> \
           </dict>";
-        let devices = mounted_devices(xml_str.as_bytes()).unwrap();
+        let devices = os_mounted_devices(xml_str.as_bytes()).unwrap();
         assert_eq!(devices.len(), 1);
 
         let device = &devices[0];
@@ -286,7 +280,7 @@ mod tests {
             <key>vendor_id</key> \
             <string>0x4321  (Company Name)</string> \
           </dict>";
-        let devices = mounted_devices(xml_str.as_bytes()).unwrap();
+        let devices = os_mounted_devices(xml_str.as_bytes()).unwrap();
         assert_eq!(devices.len(), 0);
     }
 
