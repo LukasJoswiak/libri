@@ -10,6 +10,7 @@ pub mod config;
 pub mod device;
 pub mod import;
 pub mod list;
+pub mod upload;
 
 use std::path::{Path, PathBuf};
 

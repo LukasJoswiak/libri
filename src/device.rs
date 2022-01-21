@@ -29,14 +29,23 @@ impl Device {
         }
     }
 
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn manufacturer(&self) -> &str {
+        &self.manufacturer
+    }
+
     pub fn upload_ebook(&self, ebook: &Path) {
         self.usb_info.upload_ebook(&ebook);
     }
 }
 
-/// Low-level information about a mounted USB device.
+/// Low-level information about a mounted USB device. Other modules should use the specific device
+/// struct which implements the UsbDevice trait to interact with eReaders.
 #[derive(Debug, Default)]
-pub struct MountedDevice {
+struct MountedDevice {
     mount_point: PathBuf,
     manufacturer: String,
     name: String,
@@ -45,7 +54,7 @@ pub struct MountedDevice {
 }
 
 /// Returns a list of mounted devices.
-pub fn mounted_devices() -> Result<Vec<MountedDevice>, Box<dyn Error>> {
+fn mounted_devices() -> Result<Vec<MountedDevice>, Box<dyn Error>> {
     let output = if cfg!(target_os = "macos") {
         // Parse the output of `system_profiler SPUSBDataType -xml` to read the mount point of each
         // USB device, as well as its vendor and product ID.
@@ -215,6 +224,11 @@ fn filter(devices: Vec<MountedDevice>) -> Vec<Device> {
         }
     }
     available_devices
+}
+
+pub fn available_devices() -> Result<Vec<Device>, Box<dyn Error>> {
+    let devices = mounted_devices()?;
+    Ok(filter(devices))
 }
 
 #[cfg(test)]

@@ -4,8 +4,7 @@ use std::io::{self, Write};
 use tabwriter::TabWriter;
 
 pub fn run() -> Result<(), Box<dyn Error>> {
-    let devices = super::mounted_devices()?;
-    let available_devices = super::filter(devices);
+    let available_devices = super::available_devices()?;
     let mut tw = TabWriter::new(io::stdout());
     write!(&mut tw, "\x1b[1mUID\tName\tManufacturer\x1b[0m\n").unwrap();
     for device in available_devices {

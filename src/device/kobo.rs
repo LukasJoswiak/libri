@@ -16,8 +16,12 @@ impl UsbDevice for Libra2 {
         LIBRA_2_PRODUCT_ID
     }
 
-    fn upload_ebook(&self, ebook: &Path) {
-        // TODO: Implement
-        println!("sending {:?} to Libra 2", ebook);
+    fn upload_ebook(&self, _source: &Path) {
+        // TODO: Implement. All this method needs to do is copy the source file to the right place
+        // on the device. The only logic that is expected to go in this function is device specific
+        // logic relating to where books need to be stored in order to be recognized correctly, and
+        // perhaps how they should be renamed. May refactor this function to take an Ebook struct,
+        // or if the dependencies become circular then at least the ebook title and author to
+        // assist in potential renaming.
     }
 }

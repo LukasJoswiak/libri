@@ -16,6 +16,7 @@ enum SubCommand {
     Device(Device),
     Import(Import),
     List(List),
+    Upload(Upload),
 }
 
 /// View and edit the configuration
@@ -32,6 +33,12 @@ struct Import {
 /// List books in library
 #[derive(Parser)]
 struct List {}
+
+/// Upload books to connected eReaders
+#[derive(Parser)]
+struct Upload {
+    // TODO: Add flags to filter books and devices
+}
 
 /// Manage hardware devices and their content
 #[derive(Parser)]
@@ -61,6 +68,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         },
         SubCommand::Import(i) => libri::import::run(&config, &Path::new(&i.path))?,
         SubCommand::List(_l) => libri::list::run(&config)?,
+        SubCommand::Upload(_u) => libri::upload::run(&config)?,
     }
 
     Ok(())

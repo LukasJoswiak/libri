@@ -10,7 +10,7 @@ use super::format::epub;
 use super::Ebook;
 
 /// Returns a vector of ebooks read from files in the given directory.
-fn get_ebooks(path: &Path) -> Result<Vec<Ebook>, Box<dyn Error>> {
+pub fn get_ebooks(path: &Path) -> Result<Vec<Ebook>, Box<dyn Error>> {
     let mut ebooks: Vec<Ebook> = Vec::new();
     let ebook_paths = common::find_ebooks(&path)?;
 
