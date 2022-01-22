@@ -1,3 +1,4 @@
+use std::cmp;
 use std::error::Error;
 use std::io::{self, Write};
 use std::path::Path;
@@ -27,8 +28,26 @@ pub fn get_ebooks(path: &Path) -> Result<Vec<Ebook>, Box<dyn Error>> {
 pub fn run(config: &config::Config) -> Result<(), Box<dyn Error>> {
     let ebooks = get_ebooks(&config.library)?;
 
+    // Calculate the maximum length of each category, in order to determine the correct number of
+    // "-" characters to add below the header for each column. This is pretty inefficient, but
+    // works for now.
+    let mut maxlen: Vec<usize> = vec![0, 0];
+    for ebook in &ebooks {
+        maxlen[0] = cmp::max(maxlen[0], ebook.title.len());
+        maxlen[1] = cmp::max(maxlen[1], ebook.author.len());
+    }
+
     let mut tw = TabWriter::new(io::stdout());
-    write!(&mut tw, "\x1b[1mTitle\tAuthor\x1b[0m\n").unwrap();
+    write!(&mut tw, "Title\tAuthor\n").unwrap();
+    // Note: the dash character here is an en dash, to make the separating line look even and not
+    // have spaces in between each dash.
+    write!(
+        &mut tw,
+        "{}\t{}\n",
+        "–".repeat(maxlen[0]),
+        "–".repeat(maxlen[1])
+    )
+    .unwrap();
     // TODO: Sort by date added
     for ebook in ebooks {
         write!(&mut tw, "{}\t{}\n", ebook.title, ebook.author).unwrap();

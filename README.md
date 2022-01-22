@@ -26,15 +26,13 @@ imported "A Tale of Two Cities"
 imported "Moby Dick; Or, The Whale"
 
 $ libri list
-Charles Dickens
-  A Tale of Two Cities
-  Great Expectations
-Herman Melville
-  Moby Dick; Or, The Whale
-Bram Stoker
-  Dracula
-F. Scott Fitzgerald
-  The Great Gatsby
+Title                     Author
+––––––––––––––––––––––––  –––––––––––––––––––
+A Tale of Two Cities      Charles Dickens
+Great Expectations        Charles Dickens
+Dracula                   Bram Stoker
+Moby Dick; Or, The Whale  Herman Melville
+The Great Gatsby          F. Scott Fitzgerald
 
 $ tree ~/Documents/books
 /Users/lukasjoswiak/Documents/books
