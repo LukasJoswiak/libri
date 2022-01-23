@@ -26,13 +26,13 @@ imported "A Tale of Two Cities"
 imported "Moby Dick; Or, The Whale"
 
 $ libri list
-Title                     Author
-––––––––––––––––––––––––  –––––––––––––––––––
-A Tale of Two Cities      Charles Dickens
-Great Expectations        Charles Dickens
-Dracula                   Bram Stoker
-Moby Dick; Or, The Whale  Herman Melville
-The Great Gatsby          F. Scott Fitzgerald
+Title                     Author               Created
+––––––––––––––––––––––––  –––––––––––––––––––  ––––––––––––––––
+A Tale of Two Cities      Charles Dickens      January 01, 2022
+Great Expectations        Charles Dickens      January 01, 2022
+Dracula                   Bram Stoker          January 01, 2022
+Moby Dick; Or, The Whale  Herman Melville      January 01, 2022
+The Great Gatsby          F. Scott Fitzgerald  January 01, 2022
 
 $ tree ~/Documents/books
 /Users/lukasjoswiak/Documents/books
