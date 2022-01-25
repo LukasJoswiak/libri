@@ -27,7 +27,7 @@ impl fmt::Display for ImportStats {
     }
 }
 
-pub fn run(config: &config::Config, path: &Path) -> Result<(), Box<dyn Error>> {
+pub fn run(config: &config::Config, path: &Path, dry_run: bool) -> Result<(), Box<dyn Error>> {
     let mut stats = ImportStats {
         imported: 0,
         skipped: 0,
@@ -57,13 +57,21 @@ pub fn run(config: &config::Config, path: &Path) -> Result<(), Box<dyn Error>> {
 
         let mut destination = config.library.clone();
         destination.push(format!("{}/{}", author, title));
-        fs::create_dir_all(&destination)?;
+        if !dry_run {
+            fs::create_dir_all(&destination)?;
+        }
         destination.push(format!("{}.epub", title));
-        common::copy(&ebook.path, &destination)?;
+        if !dry_run {
+            common::copy(&ebook.path, &destination)?;
+        }
         stats.imported += 1;
         println!("imported \"{}\"", ebook.title);
     }
     stats.elapsed = start.elapsed();
-    println!("\n{}", stats);
+    print!("\n{}", stats);
+    if dry_run {
+        print!("; dry run");
+    }
+    println!();
     Ok(())
 }

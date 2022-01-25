@@ -26,6 +26,11 @@ struct Config {}
 /// Import new ebooks
 #[derive(Parser)]
 struct Import {
+    /// List ebooks that would be imported from the given path without actually modifying the file
+    /// system.
+    #[clap(long)]
+    dry_run: bool,
+
     /// Path to import dir
     path: String,
 }
@@ -66,7 +71,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         SubCommand::Device(d) => match d.subcmd {
             DeviceSubCommand::DeviceList(_l) => libri::device::list::run()?,
         },
-        SubCommand::Import(i) => libri::import::run(&config, &Path::new(&i.path))?,
+        SubCommand::Import(i) => libri::import::run(&config, &Path::new(&i.path), i.dry_run)?,
         SubCommand::List(_l) => libri::list::run(&config)?,
         SubCommand::Upload(_u) => libri::upload::run(&config)?,
     }
