@@ -53,6 +53,11 @@ pub fn copy(from: &Path, to: &Path) -> io::Result<()> {
     Ok(())
 }
 
+pub fn move_file(from: &Path, to: &Path) -> io::Result<()> {
+    fs::rename(from, to)?;
+    Ok(())
+}
+
 /// Returns a modified path containing only file-system safe characters.
 pub fn sanitize(path: &str) -> String {
     // TODO: Improve the implementation by modifying the path in-place

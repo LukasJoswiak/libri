@@ -23,15 +23,23 @@ enum SubCommand {
 #[derive(Parser)]
 struct Config {}
 
-/// Import new ebooks
+/// Import new books
 #[derive(Parser)]
 struct Import {
-    /// List ebooks that would be imported from the given path without actually modifying the file
+    /// Copy books into the library (default)
+    #[clap(short, long)]
+    copy: bool,
+
+    /// Move books into the library (overrides --copy)
+    #[clap(name = "move", short, long)]
+    move_books: bool,
+
+    /// List books that would be imported from the given path without actually modifying the file
     /// system.
     #[clap(long)]
     dry_run: bool,
 
-    /// Path to import dir
+    /// Path to import directory
     path: String,
 }
 
@@ -71,7 +79,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         SubCommand::Device(d) => match d.subcmd {
             DeviceSubCommand::DeviceList(_l) => libri::device::list::run()?,
         },
-        SubCommand::Import(i) => libri::import::run(&config, &Path::new(&i.path), i.dry_run)?,
+        SubCommand::Import(i) => {
+            libri::import::run(&config, &Path::new(&i.path), i.move_books, i.dry_run)?
+        }
         SubCommand::List(_l) => libri::list::run(&config)?,
         SubCommand::Upload(_u) => libri::upload::run(&config)?,
     }
