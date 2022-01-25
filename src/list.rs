@@ -3,7 +3,7 @@ use std::error::Error;
 use std::io::{self, Write};
 use std::path::Path;
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Local};
 use tabwriter::TabWriter;
 
 use super::common;
@@ -30,7 +30,7 @@ pub fn get_ebooks(path: &Path) -> Result<Vec<Ebook>, Box<dyn Error>> {
 /// string is suitable for display to the user.
 fn created(ebook: &Ebook) -> String {
     let metadata = ebook.path.metadata().expect("failed to read file metadata");
-    let created: DateTime<Utc> = DateTime::from(
+    let created: DateTime<Local> = DateTime::from(
         metadata
             .created()
             .expect("failed to read file creation date"),
