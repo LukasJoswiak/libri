@@ -17,14 +17,16 @@ use std::path::{Path, PathBuf};
 /// Represents an eBook.
 #[derive(Debug)]
 pub struct Ebook {
+    identifier: String,
     title: String,
     author: String,
     path: PathBuf,
 }
 
 impl Ebook {
-    fn new(title: String, author: String, path: &Path) -> Ebook {
+    fn new(identifier: String, title: String, author: String, path: &Path) -> Ebook {
         Ebook {
+            identifier,
             title,
             author,
             path: path.to_path_buf(),

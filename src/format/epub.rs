@@ -12,19 +12,39 @@ pub fn parse(path: &Path) -> Result<Ebook, Box<dyn Error>> {
     let metadata_path = get_metadata_path(&mut archive)?;
     let document = parse_metadata(&mut archive, metadata_path.as_path())?;
 
+    let unique_identifier_attribute = document
+        .elements
+        .iter()
+        .find(|x| x.tag == "package")
+        .unwrap()
+        .attributes
+        .get("unique-identifier")
+        .expect("epub metadata missing unique identifier attribute");
+
     Ok(Ebook::new(
         document
             .elements
             .iter()
+            .find(|x| {
+                x.prefix.as_deref() == Some("dc")
+                    && x.tag == "identifier"
+                    && x.attributes.contains_key(unique_identifier_attribute)
+            })
+            .expect("epub metadata missing unique identifier")
+            .content
+            .clone(),
+        document
+            .elements
+            .iter()
             .find(|x| x.prefix.as_deref() == Some("dc") && x.tag == "title")
-            .unwrap()
+            .expect("epub metadata missing title")
             .content
             .clone(),
         document
             .elements
             .iter()
             .find(|x| x.prefix.as_deref() == Some("dc") && x.tag == "creator")
-            .unwrap()
+            .expect("epub metadata missing author")
             .content
             .clone(),
         path,
