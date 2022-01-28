@@ -28,7 +28,7 @@ pub fn parse(path: &Path) -> Result<Ebook, Box<dyn Error>> {
             .find(|x| {
                 x.prefix.as_deref() == Some("dc")
                     && x.tag == "identifier"
-                    && x.attributes.contains_key(unique_identifier_attribute)
+                    && x.attributes.get("id").unwrap() == unique_identifier_attribute
             })
             .expect("epub metadata missing unique identifier")
             .content
