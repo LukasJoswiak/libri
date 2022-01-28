@@ -33,6 +33,10 @@ pub fn run(
     move_books: bool,
     dry_run: bool,
 ) -> Result<(), Box<dyn Error>> {
+    if !path.is_dir() {
+        return Err(format!("invalid path: '{}'", path.display()).into());
+    }
+
     let mut stats = ImportStats {
         imported: 0,
         skipped: 0,

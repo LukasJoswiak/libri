@@ -1,90 +1,197 @@
-use clap::Parser;
 use std::error::Error;
-use std::path::Path;
+use std::ffi::{OsStr, OsString};
+use std::path::PathBuf;
+use std::process;
 
-/// Libri is a command line tool to organize your ebooks
-#[derive(Parser)]
-#[clap(version = "0.1.0")]
-struct Opts {
-    #[clap(subcommand)]
-    subcmd: SubCommand,
-}
+use pico_args::Arguments;
 
-#[derive(Parser)]
-enum SubCommand {
-    Config(Config),
+#[derive(Debug)]
+enum AppArgs {
+    Config {},
+    List {},
+    Import {
+        path: PathBuf,
+        move_books: bool,
+        dry_run: bool,
+    },
+    Upload {},
     Device(Device),
-    Import(Import),
-    List(List),
-    Upload(Upload),
 }
 
-/// View and edit the configuration
-#[derive(Parser)]
-struct Config {}
-
-/// Import new books
-#[derive(Parser)]
-struct Import {
-    /// Copy books into the library (default)
-    #[clap(short, long)]
-    copy: bool,
-
-    /// Move books into the library (overrides --copy)
-    #[clap(name = "move", short, long)]
-    move_books: bool,
-
-    /// List books that would be imported from the given path without actually modifying the file
-    /// system.
-    #[clap(long)]
-    dry_run: bool,
-
-    /// Path to import directory
-    path: String,
+#[derive(Debug)]
+enum Device {
+    List {},
 }
-
-/// List books in library
-#[derive(Parser)]
-struct List {}
-
-/// Upload books to connected eReaders
-#[derive(Parser)]
-struct Upload {
-    // TODO: Add flags to filter books and devices
-}
-
-/// Manage hardware devices and their content
-#[derive(Parser)]
-struct Device {
-    #[clap(subcommand)]
-    subcmd: DeviceSubCommand,
-}
-
-#[derive(Parser)]
-enum DeviceSubCommand {
-    #[clap(name = "list")]
-    DeviceList(DeviceList),
-}
-
-/// List connected eReaders supported by libri
-#[derive(Parser)]
-struct DeviceList {}
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let opts: Opts = Opts::parse();
     let config = libri::config::read();
-
-    match opts.subcmd {
-        SubCommand::Config(_c) => libri::config::run(&config),
-        SubCommand::Device(d) => match d.subcmd {
-            DeviceSubCommand::DeviceList(_l) => libri::device::list::run()?,
+    match parse_args() {
+        Ok(args) => match args {
+            AppArgs::Config {} => {
+                libri::config::run(&config);
+                Ok(())
+            }
+            AppArgs::List {} => libri::list::run(&config),
+            AppArgs::Import {
+                path,
+                move_books,
+                dry_run,
+            } => libri::import::run(&config, &path, move_books, dry_run),
+            AppArgs::Upload {} => libri::upload::run(&config),
+            AppArgs::Device(subcommand) => match subcommand {
+                Device::List {} => libri::device::list::run(),
+            },
         },
-        SubCommand::Import(i) => {
-            libri::import::run(&config, &Path::new(&i.path), i.move_books, i.dry_run)?
+        Err(e) => {
+            eprintln!("{}", e);
+            process::exit(1);
         }
-        SubCommand::List(_l) => libri::list::run(&config)?,
-        SubCommand::Upload(_u) => libri::upload::run(&config)?,
     }
-
-    Ok(())
 }
+
+fn parse_args() -> Result<AppArgs, Box<dyn Error>> {
+    let mut args = Arguments::from_env();
+
+    match args.subcommand()?.as_deref() {
+        Some("config") => {
+            if args.contains(["-h", "--help"]) {
+                return Err(CONFIG_HELP.into());
+            }
+            handle_extra_args(args.finish());
+            Ok(AppArgs::Config {})
+        }
+        Some("list") => {
+            if args.contains(["-h", "--help"]) {
+                return Err(LIST_HELP.into());
+            }
+            handle_extra_args(args.finish());
+            Ok(AppArgs::List {})
+        }
+        Some("import") => {
+            if args.contains(["-h", "--help"]) {
+                return Err(IMPORT_HELP.into());
+            }
+            let import = AppArgs::Import {
+                path: args.free_from_os_str(parse_path)?,
+                move_books: args.contains(["-m", "--move"]),
+                dry_run: args.contains("--dry-run"),
+            };
+            handle_extra_args(args.finish());
+            Ok(import)
+        }
+        Some("upload") => {
+            if args.contains(["-h", "--help"]) {
+                return Err(UPLOAD_HELP.into());
+            }
+            handle_extra_args(args.finish());
+            Ok(AppArgs::Upload {})
+        }
+        Some("device") => {
+            if args.contains(["-h", "--help"]) {
+                return Err(DEVICE_HELP.into());
+            }
+            match args.subcommand()?.as_deref() {
+                Some("list") => {
+                    handle_extra_args(args.finish());
+                    Ok(AppArgs::Device(Device::List {}))
+                }
+                Some(s) => {
+                    Err(format!("unknown subcommand '{}'. See 'libri device --help'", s).into())
+                }
+                None => {
+                    handle_extra_args(args.finish());
+                    Err(DEVICE_HELP.into())
+                }
+            }
+        }
+        Some(s) => Err(format!("unknown subcommand '{}'. See 'libri --help'", s).into()),
+        None => {
+            args.contains(["-h", "--help"]);
+            handle_extra_args(args.finish());
+            Err(GLOBAL_HELP.into())
+        }
+    }
+}
+
+fn parse_path(s: &OsStr) -> Result<PathBuf, &'static str> {
+    Ok(s.into())
+}
+
+fn handle_extra_args(args: Vec<OsString>) {
+    if !args.is_empty() {
+        eprintln!("unknown argument {:?}", args[0]);
+        process::exit(1);
+    }
+}
+
+const GLOBAL_HELP: &str = "\
+An ebook management tool
+
+USAGE:
+  libri <SUBCOMMAND>
+
+FLAGS:
+  -h, --help            Print help information
+
+SUBCOMMANDS:
+  config                View and edit the configuration
+  list                  List books in the library
+  import                Import new books
+  upload                Upload books to connected eReaders
+  device                Manage hardware devices and their content";
+
+const CONFIG_HELP: &str = "\
+libri-config
+View and edit the configuration
+
+USAGE:
+  libri config
+
+FLAGS:
+  -h, --help            Print help information";
+
+const LIST_HELP: &str = "\
+libri-list
+List books in the library
+
+USAGE:
+  libri list
+
+FLAGS:
+  -h, --help            Print help information";
+
+const IMPORT_HELP: &str = "\
+libri-import
+Import new books
+
+USAGE:
+  libri import PATH
+
+FLAGS:
+  -h, --help            Print help information
+
+ARGS:
+  <PATH>                Path to import directory";
+
+const UPLOAD_HELP: &str = "\
+libri-upload
+Upload books to connected eReaders
+
+USAGE:
+  libri upload
+
+FLAGS:
+  -h, --help            Print help information";
+
+const DEVICE_HELP: &str = "\
+libri-device
+Manage hardware devices and their content
+
+USAGE:
+  libri device <SUBCOMMAND>
+
+FLAGS:
+  -h, --help            Print help information
+
+SUBCOMMANDS:
+  list                  List connected eReaders supported by libri";
