@@ -16,6 +16,7 @@ fn default_library() -> String {
 
 fn config_path() -> PathBuf {
     // TODO: Make platform specific
+    // TODO: Prefer reading config path from environment variable if present
     let home = std::env::var("HOME").unwrap();
     PathBuf::from(format!("{}/.config/libri/config.ini", home))
 }
@@ -25,7 +26,13 @@ pub fn read() -> Result<Config, Box<dyn Error>> {
     // For now, always look in ~/.config/libri/config.ini. Should migrate to platform specific
     // paths (https://github.com/dirs-dev/directories-rs).
     let mut config = Ini::new();
-    config.load(config_path())?;
+    let config_path = config_path();
+    if config_path.exists() {
+        match config.load(config_path) {
+            Ok(_) => {}
+            Err(error) => panic!("problem reading the configuration file: {}", error),
+        }
+    }
     let library = config.get("default", "library");
 
     Ok(Config {
