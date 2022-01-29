@@ -56,10 +56,10 @@ $ tree ~/Documents/books
 
 The best way to use libri is to build from source. Clone the project, then run `cargo build`. A binary will be generated at `target/debug/libri`.
 
-The default folder libri stores imported ebooks in is `$HOME/Documents/books/`. To modify the default location, create the file `$HOME/.config/libri/config.toml`, and set `library` to the path you want ebooks saved to:
+The default folder libri stores imported ebooks in is `$HOME/Documents/books/`. To modify the default location, create the file `$HOME/.config/libri/config.ini`, and set `library` to the path you want ebooks saved to:
 
 ```
-library = "/Users/lukasjoswiak/books"
+library = /Users/lukasjoswiak/books
 ```
 
 Tilde expansion is not yet supported, so make sure to use an absolute path for now. Run `libri config` to make sure libri is correctly reading your updated configuration.

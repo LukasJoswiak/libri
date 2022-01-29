@@ -6,11 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+configparser = "3.0.0"
 chrono = "0.4"
 pico-args = "0.4.2"
-serde = { version = "1.0", features = ["derive"] }
 tabwriter = { version = "1", features = ["ansi_formatting"] }
-toml = "0.5"
 xml-rs = "0.8.4"
 zip = "0.5.13"
 

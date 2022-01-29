@@ -1,45 +1,35 @@
-use std::fs;
-use std::io::ErrorKind;
+use std::error::Error;
 use std::path::PathBuf;
 
-use serde::Deserialize;
+use configparser::ini::Ini;
 
-#[derive(Deserialize, Debug)]
+#[derive(Debug)]
 pub struct Config {
-    #[serde(default = "default_library")]
     pub library: PathBuf,
 }
 
-fn default_library() -> PathBuf {
+fn default_library() -> String {
     // TODO: Make platform specific
     let home = std::env::var("HOME").unwrap();
-    PathBuf::from(format!("{}/Documents/books/", home))
+    format!("{}/Documents/books/", home)
 }
 
 fn config_path() -> PathBuf {
     // TODO: Make platform specific
     let home = std::env::var("HOME").unwrap();
-    PathBuf::from(format!("{}/.config/libri/config.toml", home))
+    PathBuf::from(format!("{}/.config/libri/config.ini", home))
 }
 
 /// Reads the configuration from disk and returns it as a struct.
-pub fn read() -> Config {
-    // For now, always look in ~/.config/libri/config.toml. Should migrate to platform specific
+pub fn read() -> Result<Config, Box<dyn Error>> {
+    // For now, always look in ~/.config/libri/config.ini. Should migrate to platform specific
     // paths (https://github.com/dirs-dev/directories-rs).
-    let config_path = config_path();
+    let mut config = Ini::new();
+    config.load(config_path())?;
+    let library = config.get("default", "library");
 
-    let contents = match fs::read_to_string(config_path) {
-        Ok(contents) => contents,
-        Err(error) => match error.kind() {
-            ErrorKind::NotFound => String::new(),
-            other_error => {
-                panic!("problem opening the configuration file: {:?}", other_error)
-            }
-        },
-    };
-
-    toml::from_str(&contents).unwrap_or_else(|error| {
-        panic!("failed to parse the configuration file: {}", error);
+    Ok(Config {
+        library: PathBuf::from(library.unwrap_or_else(default_library)),
     })
 }
 

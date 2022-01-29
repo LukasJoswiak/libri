@@ -24,7 +24,7 @@ enum Device {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let config = libri::config::read();
+    let config = libri::config::read()?;
     match parse_args() {
         Ok(args) => match args {
             AppArgs::Config {} => {
