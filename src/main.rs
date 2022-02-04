@@ -1,12 +1,16 @@
 use std::error::Error;
 use std::ffi::{OsStr, OsString};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process;
 
 use pico_args::Arguments;
 
 #[derive(Debug)]
 enum AppArgs {
+    Global {
+        config_dir: Option<PathBuf>,
+        remaining_args: Vec<OsString>,
+    },
     Config {},
     List {},
     Import {
@@ -24,20 +28,38 @@ enum Device {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let config = libri::config::read()?;
-    match parse_args() {
+    run(Arguments::from_env(), None)
+}
+
+fn run(args: Arguments, config_dir: Option<&Path>) -> Result<(), Box<dyn Error>> {
+    match parse_args(args) {
         Ok(args) => match args {
+            AppArgs::Global {
+                config_dir,
+                remaining_args,
+            } => {
+                let config_dir = match &config_dir {
+                    Some(dir) => Some(dir.as_path()),
+                    None => None,
+                };
+                run(Arguments::from_vec(remaining_args), config_dir)
+            }
             AppArgs::Config {} => {
-                libri::config::run(&config);
+                libri::config::run(&libri::config::read(config_dir)?);
                 Ok(())
             }
-            AppArgs::List {} => libri::list::run(&config),
+            AppArgs::List {} => libri::list::run(&libri::config::read(config_dir)?),
             AppArgs::Import {
                 path,
                 move_books,
                 dry_run,
-            } => libri::import::run(&config, &path, move_books, dry_run),
-            AppArgs::Upload {} => libri::upload::run(&config),
+            } => libri::import::run(
+                &libri::config::read(config_dir)?,
+                &path,
+                move_books,
+                dry_run,
+            ),
+            AppArgs::Upload {} => libri::upload::run(&libri::config::read(config_dir)?),
             AppArgs::Device(subcommand) => match subcommand {
                 Device::List {} => libri::device::list::run(),
             },
@@ -49,9 +71,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 }
 
-fn parse_args() -> Result<AppArgs, Box<dyn Error>> {
-    let mut args = Arguments::from_env();
-
+fn parse_args(mut args: Arguments) -> Result<AppArgs, Box<dyn Error>> {
     match args.subcommand()?.as_deref() {
         Some("config") => {
             if args.contains(["-h", "--help"]) {
@@ -106,9 +126,19 @@ fn parse_args() -> Result<AppArgs, Box<dyn Error>> {
         }
         Some(s) => Err(format!("unknown subcommand '{}'. See 'libri --help'", s).into()),
         None => {
-            args.contains(["-h", "--help"]);
+            if args.contains(["-h", "--help"]) {
+                return Err(GLOBAL_HELP.into());
+            }
+            let config_dir: Option<PathBuf> =
+                args.opt_value_from_os_str("--config-dir", parse_path)?;
+            if config_dir.is_some() {
+                return Ok(AppArgs::Global {
+                    config_dir,
+                    remaining_args: args.finish(),
+                });
+            }
             handle_extra_args(args.finish());
-            Err(GLOBAL_HELP.into())
+            return Err(GLOBAL_HELP.into());
         }
     }
 }

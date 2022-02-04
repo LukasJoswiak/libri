@@ -1,5 +1,5 @@
 use std::error::Error;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use configparser::ini::Ini;
 
@@ -14,19 +14,27 @@ fn default_library() -> String {
     format!("{}/Documents/books/", home)
 }
 
-fn config_path() -> PathBuf {
+fn config_path(config_dir: Option<&Path>) -> PathBuf {
     // TODO: Make platform specific
-    // TODO: Prefer reading config path from environment variable if present
+    // TODO: Prefer reading config path from environment variable if present (LIBRI_CONFIG_PATH)
     let home = std::env::var("HOME").unwrap();
-    PathBuf::from(format!("{}/.config/libri/config.ini", home))
+    let mut config_dir = match config_dir {
+        Some(dir) => {
+            assert!(dir.is_dir());
+            PathBuf::from(dir)
+        }
+        None => PathBuf::from(format!("{}/.config/libri/", home)),
+    };
+    config_dir.push("config.ini");
+    config_dir
 }
 
 /// Reads the configuration from disk and returns it as a struct.
-pub fn read() -> Result<Config, Box<dyn Error>> {
+pub fn read(config_dir: Option<&Path>) -> Result<Config, Box<dyn Error>> {
     // For now, always look in ~/.config/libri/config.ini. Should migrate to platform specific
     // paths (https://github.com/dirs-dev/directories-rs).
     let mut config = Ini::new();
-    let config_path = config_path();
+    let config_path = config_path(config_dir);
     if config_path.exists() {
         match config.load(config_path) {
             Ok(_) => {}
