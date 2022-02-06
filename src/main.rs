@@ -158,10 +158,13 @@ const GLOBAL_HELP: &str = "\
 An ebook management tool
 
 USAGE:
-  libri <SUBCOMMAND>
+  libri [OPTIONS] <SUBCOMMAND>
 
 FLAGS:
   -h, --help            Print help information
+
+OPTIONS:
+  --config-dir PATH     Path to an alternate configuration directory
 
 SUBCOMMANDS:
   config                View and edit the configuration
