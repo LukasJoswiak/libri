@@ -75,21 +75,24 @@ fn parse_args(mut args: Arguments) -> Result<AppArgs, Box<dyn Error>> {
     match args.subcommand()?.as_deref() {
         Some("config") => {
             if args.contains(["-h", "--help"]) {
-                return Err(CONFIG_HELP.into());
+                println!("{}", CONFIG_HELP);
+                process::exit(0);
             }
             handle_extra_args(args.finish());
             Ok(AppArgs::Config {})
         }
         Some("list") => {
             if args.contains(["-h", "--help"]) {
-                return Err(LIST_HELP.into());
+                println!("{}", LIST_HELP);
+                process::exit(0);
             }
             handle_extra_args(args.finish());
             Ok(AppArgs::List {})
         }
         Some("import") => {
             if args.contains(["-h", "--help"]) {
-                return Err(IMPORT_HELP.into());
+                println!("{}", IMPORT_HELP);
+                process::exit(0);
             }
             let import = AppArgs::Import {
                 path: args.free_from_os_str(parse_path)?,
@@ -101,14 +104,16 @@ fn parse_args(mut args: Arguments) -> Result<AppArgs, Box<dyn Error>> {
         }
         Some("upload") => {
             if args.contains(["-h", "--help"]) {
-                return Err(UPLOAD_HELP.into());
+                println!("{}", UPLOAD_HELP);
+                process::exit(0);
             }
             handle_extra_args(args.finish());
             Ok(AppArgs::Upload {})
         }
         Some("device") => {
             if args.contains(["-h", "--help"]) {
-                return Err(DEVICE_HELP.into());
+                println!("{}", DEVICE_HELP);
+                process::exit(0);
             }
             match args.subcommand()?.as_deref() {
                 Some("list") => {
@@ -120,14 +125,16 @@ fn parse_args(mut args: Arguments) -> Result<AppArgs, Box<dyn Error>> {
                 }
                 None => {
                     handle_extra_args(args.finish());
-                    Err(DEVICE_HELP.into())
+                    println!("{}", DEVICE_HELP);
+                    process::exit(0);
                 }
             }
         }
         Some(s) => Err(format!("unknown subcommand '{}'. See 'libri --help'", s).into()),
         None => {
             if args.contains(["-h", "--help"]) {
-                return Err(GLOBAL_HELP.into());
+                println!("{}", GLOBAL_HELP);
+                process::exit(0);
             }
             let config_dir: Option<PathBuf> =
                 args.opt_value_from_os_str("--config-dir", parse_path)?;
@@ -138,7 +145,8 @@ fn parse_args(mut args: Arguments) -> Result<AppArgs, Box<dyn Error>> {
                 });
             }
             handle_extra_args(args.finish());
-            return Err(GLOBAL_HELP.into());
+            println!("{}", GLOBAL_HELP);
+            process::exit(1);
         }
     }
 }
