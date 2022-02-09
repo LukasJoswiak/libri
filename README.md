@@ -25,6 +25,8 @@ imported "The Great Gatsby"
 imported "A Tale of Two Cities"
 imported "Moby Dick; Or, The Whale"
 
+imported 5; skipped 0; finished in 0.05s
+
 $ libri list
 Title                     Author               Created
 ––––––––––––––––––––––––  –––––––––––––––––––  ––––––––––––––––
