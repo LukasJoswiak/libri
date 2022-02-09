@@ -56,6 +56,76 @@ fn list_unknown_argument() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-// TODO: Test all help variants
-// libri --help list // prints global help
-// libri list --help // prints list help
+#[test]
+fn global_help() -> Result<(), Box<dyn Error>> {
+    let mut cmd = Command::cargo_bin("libri")?;
+
+    cmd.arg("--help");
+    cmd.assert().success().stdout(
+        predicate::str::is_match("libri.*SUBCOMMAND")
+            .unwrap()
+            .count(1),
+    );
+
+    Ok(())
+}
+
+#[test]
+fn config_help() -> Result<(), Box<dyn Error>> {
+    let mut cmd = Command::cargo_bin("libri")?;
+
+    cmd.arg("config").arg("--help");
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("libri-config"));
+
+    Ok(())
+}
+
+#[test]
+fn list_help() -> Result<(), Box<dyn Error>> {
+    let mut cmd = Command::cargo_bin("libri")?;
+
+    cmd.arg("list").arg("--help");
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("libri-list"));
+
+    Ok(())
+}
+
+#[test]
+fn import_help() -> Result<(), Box<dyn Error>> {
+    let mut cmd = Command::cargo_bin("libri")?;
+
+    cmd.arg("import").arg("--help");
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("libri-import"));
+
+    Ok(())
+}
+
+#[test]
+fn upload_help() -> Result<(), Box<dyn Error>> {
+    let mut cmd = Command::cargo_bin("libri")?;
+
+    cmd.arg("upload").arg("--help");
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("libri-upload"));
+
+    Ok(())
+}
+
+#[test]
+fn device_help() -> Result<(), Box<dyn Error>> {
+    let mut cmd = Command::cargo_bin("libri")?;
+
+    cmd.arg("device").arg("--help");
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("libri-device"));
+
+    Ok(())
+}
