@@ -2,6 +2,7 @@ use std::error::Error;
 use std::process::Command;
 
 use assert_cmd::prelude::*;
+use assert_fs::prelude::*;
 use predicates::prelude::*;
 
 #[test]
@@ -31,18 +32,22 @@ fn unknown_subcommand() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-// #[test]
-// fn list_empty_library() -> Result<(), Box<dyn Error>> {
-//     let mut cmd = Command::cargo_bin("libri")?;
-//     // TODO: Set the library path
-//
-//     cmd.arg("list");
-//     cmd.assert()
-//         .success()
-//         .stdout(predicate::str::contains("\n").count(2));
-//
-//     Ok(())
-// }
+#[test]
+fn list_empty_library() -> Result<(), Box<dyn Error>> {
+    let dir = assert_fs::TempDir::new().unwrap();
+    let config = dir.child("config.ini");
+    config.write_str(format!("library = {}", dir.path().to_str().unwrap()).as_str())?;
+
+    let mut cmd = Command::cargo_bin("libri")?;
+    cmd.arg("--config-dir")
+        .arg(dir.path().to_str().unwrap())
+        .arg("list");
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("\n").count(2));
+
+    Ok(())
+}
 
 #[test]
 fn list_unknown_argument() -> Result<(), Box<dyn Error>> {
