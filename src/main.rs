@@ -206,13 +206,13 @@ libri-import
 Import new books
 
 USAGE:
-  libri import PATH
+  libri import <PATH>
 
 FLAGS:
   -h, --help            Print help information
 
 ARGS:
-  <PATH>                Path to import directory";
+  PATH                  Path to import directory";
 
 const UPLOAD_HELP: &str = "\
 libri-upload
