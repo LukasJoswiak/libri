@@ -19,5 +19,9 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         .unwrap();
     }
     tw.flush().unwrap();
+
+    let _devices = super::darwin::usb_devices();
+    // println!("devices: {:#?}", devices);
+
     Ok(())
 }

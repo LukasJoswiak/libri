@@ -13,6 +13,11 @@ tabwriter = { version = "1", features = ["ansi_formatting"] }
 xml-rs = "0.8.4"
 zip = "0.5.13"
 
+[target.'cfg(target_os = "macos")'.dependencies]
+libc = "^0.2"
+mach = "^0.3"
+core-foundation = "~0.9"
+
 [dev-dependencies]
 assert_cmd = "2.0"
 assert_fs = "1.0"

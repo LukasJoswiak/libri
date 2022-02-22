@@ -127,6 +127,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06821ea598337a8412cf47c5b71c3bc694a7f0aed188ac28b836fab164a2c202"
 
 [[package]]
+name = "core-foundation"
+version = "0.9.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "194a7a9e6de53fa55116934067c844d9d749312f75c6f6d0980e8c252f8c2146"
+dependencies = [
+ "core-foundation-sys",
+ "libc",
+]
+
+[[package]]
+name = "core-foundation-sys"
+version = "0.8.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5827cebf4670468b8772dd191856768aedcb1b0278a04f989f7766351917b9dc"
+
+[[package]]
 name = "crc32fast"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -279,6 +295,9 @@ dependencies = [
  "assert_fs",
  "chrono",
  "configparser",
+ "core-foundation",
+ "libc",
+ "mach",
  "pico-args",
  "predicates",
  "tabwriter",
@@ -293,6 +312,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "51b9bbe6c47d51fc3e1a9b945965946b4c44142ab8792c50835a980d362c2710"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "mach"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b823e83b2affd8f40a9ee8c29dbc56404c1e34cd2710921f2801e2cf29527afa"
+dependencies = [
+ "libc",
 ]
 
 [[package]]

@@ -1,3 +1,4 @@
+mod darwin;
 mod kobo;
 pub mod list;
 mod usb;
