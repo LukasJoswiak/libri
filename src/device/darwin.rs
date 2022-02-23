@@ -9,6 +9,7 @@
 //   * https://github.com/jtakakura/io-kit-rs
 //
 
+#![cfg(target_os = "macos")]
 #![allow(non_camel_case_types, non_upper_case_globals)]
 
 use std::error::Error;
