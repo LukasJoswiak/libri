@@ -19,11 +19,5 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         .unwrap();
     }
     tw.flush().unwrap();
-
-    #[cfg(target_os = "macos")]
-    let _devices = super::darwin::usb_devices();
-    // #[cfg(target_os = "macos")]
-    // println!("devices: {:#?}", devices);
-
     Ok(())
 }
