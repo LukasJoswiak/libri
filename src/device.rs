@@ -49,31 +49,22 @@ pub struct MountedDevice {
     product_id: u16,
 }
 
-/// Returns a list of mounted devices.
+/// Returns a list of mounted devices (macOS specific).
+#[cfg(target_os = "macos")]
 fn mounted_devices() -> Result<Vec<MountedDevice>, Box<dyn Error>> {
-    if cfg!(target_os = "macos") {
-        darwin::usb_devices()
-    } else if cfg!(target_os = "linux") {
-        // TODO: Implement
-        Ok(vec![])
-    } else if cfg!(target_os = "windows") {
-        // TODO: Implement
-        Ok(vec![])
-    } else {
-        Ok(vec![])
-    }
+    darwin::usb_devices()
 }
 
 /// Returns a list of mounted devices (Linux specific).
 #[cfg(target_os = "linux")]
-fn os_mounted_devices(_data: &[u8]) -> Result<Vec<MountedDevice>, Box<dyn Error>> {
+fn mounted_devices() -> Result<Vec<MountedDevice>, Box<dyn Error>> {
     // TODO: Implement
     panic!("device recognition not yet implemented for Linux");
 }
 
 /// Returns a list of mounted devices (Windows specific).
 #[cfg(target_os = "windows")]
-fn os_mounted_devices(_data: &[u8]) -> Result<Vec<MountedDevice>, Box<dyn Error>> {
+fn mounted_devices() -> Result<Vec<MountedDevice>, Box<dyn Error>> {
     // TODO: Implement
     panic!("device recognition not yet implemented for Windows");
 }
