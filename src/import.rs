@@ -2,6 +2,7 @@ use std::error::Error;
 use std::fmt;
 use std::fs;
 use std::path::Path;
+use std::process::Command;
 use std::time::{Duration, Instant};
 
 use crate::common;
@@ -76,6 +77,12 @@ pub fn run(
             } else {
                 common::copy(&ebook.path, &destination)?;
             }
+            // Update the last modified timestamp of the book so the import date shows up when
+            // running the list command.
+            if cfg!(target_family = "unix") {
+                Command::new("touch").arg(&destination).status()?;
+            }
+            // TODO: Support other platforms
         }
         stats.imported += 1;
         println!("imported \"{}\"", ebook.title);

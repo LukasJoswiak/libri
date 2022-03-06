@@ -1,9 +1,13 @@
 use std::cmp;
 use std::error::Error;
+use std::fs::Metadata;
 use std::io::{self, Write};
 use std::path::Path;
 
-use chrono::{DateTime, Local};
+#[cfg(target_family = "unix")]
+use std::os::unix::fs::MetadataExt;
+
+use chrono::{DateTime, Local, NaiveDateTime, Utc};
 use tabwriter::TabWriter;
 
 use super::common;
@@ -26,16 +30,30 @@ pub fn get_ebooks(path: &Path) -> Result<Vec<Ebook>, Box<dyn Error>> {
     Ok(ebooks)
 }
 
+#[cfg(target_family = "unix")]
+fn modified_datetime(metadata: &Metadata) -> DateTime<Utc> {
+    let naive = NaiveDateTime::from_timestamp(metadata.mtime(), 0);
+    DateTime::from_utc(naive, Utc)
+}
+
+// TODO: Support the more accurate "last modified" datetime on other platforms (this will require
+// support for updating the last modified timestamp when importing books on other platforms as
+// well).
+#[cfg(not(target_family = "unix"))]
+fn modified_datetime(metadata: &Metadata) -> DateTime<Utc> {
+    DateTime::from(metadata.created().unwrap_or_default(0))
+}
+
 /// Returns a string representation of the date the ebook was added to the library. The returned
 /// string is suitable for display to the user.
 fn created(ebook: &Ebook) -> String {
     let metadata = ebook.path.metadata().expect("failed to read file metadata");
-    let created: DateTime<Local> = DateTime::from(
-        metadata
-            .created()
-            .expect("failed to read file creation date"),
-    );
-    format!("{}", created.format("%B %d, %Y"))
+    format!(
+        "{}",
+        modified_datetime(&metadata)
+            .with_timezone(&Local)
+            .format("%B %d, %Y")
+    )
 }
 
 pub fn run(config: &config::Config) -> Result<(), Box<dyn Error>> {
