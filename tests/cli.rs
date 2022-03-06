@@ -39,9 +39,7 @@ fn list_empty_library() -> Result<(), Box<dyn Error>> {
     config.write_str(format!("library = {}", dir.path().to_str().unwrap()).as_str())?;
 
     let mut cmd = Command::cargo_bin("libri")?;
-    cmd.arg("--config-dir")
-        .arg(dir.path().to_str().unwrap())
-        .arg("list");
+    cmd.arg("--config-dir").arg(dir.path()).arg("list");
     cmd.assert()
         .success()
         .stdout(predicate::str::contains("\n").count(2));
