@@ -7,6 +7,7 @@
 //   * https://svartalf.info/posts/2019-05-31-poking-the-macos-io-kit-with-rust/
 //   * https://github.com/svartalf/rust-battery
 //   * https://github.com/jtakakura/io-kit-rs
+//   * https://github.com/kovidgoyal/calibre/blob/master/src/calibre/devices/usbobserver/usbobserver.c
 //
 
 #![cfg(target_os = "macos")]
