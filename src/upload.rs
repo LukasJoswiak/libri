@@ -19,11 +19,12 @@ pub fn run(config: &config::Config) -> Result<(), Box<dyn Error>> {
         println!("no ebooks selected");
         return Ok(());
     }
-    available_devices
-        .iter()
-        .for_each(|device| ebooks.iter().for_each(|ebook| {
-            println!("uploading {} to {} (the device-specific upload function is currently a stub, making this a no-op)", &ebook.title, device.name());
-            device.upload_ebook(&ebook.path)
-        }));
+    available_devices.iter().for_each(|device| {
+        ebooks.iter().for_each(|ebook| {
+            device.upload_ebook(&ebook).unwrap();
+            println!("uploaded {} to {}", &ebook.title, device.name());
+        })
+    });
+    // TODO: Add statistics, similar to `libri import`
     Ok(())
 }

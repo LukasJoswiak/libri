@@ -4,8 +4,9 @@ pub mod list;
 mod usb;
 
 use std::error::Error;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
+use super::Ebook;
 use kobo::{Libra2, KOBO_VENDOR_ID, LIBRA_2_PRODUCT_ID};
 use usb::UsbDevice;
 
@@ -33,8 +34,8 @@ impl Device {
         &self.manufacturer
     }
 
-    pub fn upload_ebook(&self, ebook: &Path) {
-        self.usb_info.upload_ebook(&ebook);
+    pub fn upload_ebook(&self, ebook: &Ebook) -> Result<(), Box<dyn Error>> {
+        self.usb_info.upload_ebook(&ebook)
     }
 }
 
@@ -80,7 +81,7 @@ fn filter(devices: Vec<MountedDevice>) -> Vec<Device> {
                 available_devices.push(Device::new(
                     device.name,
                     device.manufacturer,
-                    Box::new(Libra2 {}),
+                    Box::new(Libra2::new(device.mount_point)),
                 ));
             }
             _ => {}

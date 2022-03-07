@@ -1,13 +1,28 @@
-use std::path::Path;
+use std::error::Error;
+use std::fs;
+use std::path::{Path, PathBuf};
 
+use super::super::{common, Ebook};
 use super::UsbDevice;
 
 pub const KOBO_VENDOR_ID: u16 = 0x2237;
 pub const LIBRA_2_PRODUCT_ID: u16 = 0x4234;
 
-pub struct Libra2 {}
+pub struct Libra2 {
+    mount_dir: PathBuf,
+}
+
+impl Libra2 {
+    pub fn new(mount_dir: PathBuf) -> Libra2 {
+        Libra2 { mount_dir }
+    }
+}
 
 impl UsbDevice for Libra2 {
+    fn mount_dir(&self) -> &Path {
+        self.mount_dir.as_path()
+    }
+
     fn vendor_id(&self) -> u16 {
         KOBO_VENDOR_ID
     }
@@ -16,12 +31,19 @@ impl UsbDevice for Libra2 {
         LIBRA_2_PRODUCT_ID
     }
 
-    fn upload_ebook(&self, _source: &Path) {
-        // TODO: Implement. All this method needs to do is copy the source file to the right place
-        // on the device. The only logic that is expected to go in this function is device specific
-        // logic relating to where books need to be stored in order to be recognized correctly, and
-        // perhaps how they should be renamed. May refactor this function to take an Ebook struct,
-        // or if the dependencies become circular then at least the ebook title and author to
-        // assist in potential renaming.
+    // TODO: Add option to auto-convert epubs to kepubs!
+    fn upload_ebook(&self, ebook: &Ebook) -> Result<(), Box<dyn Error>> {
+        // TODO: Factor out any common logic that can be reused across devices
+        let author = common::sanitize(&ebook.author);
+        let title = common::sanitize(&ebook.title);
+
+        let mut destination = self.mount_dir().to_path_buf();
+        // TODO: Use current ebook path instead of rebuilding it (but remember to trim off the
+        // beginning)
+        destination.push(format!("{}/{}", author, title));
+        fs::create_dir_all(&destination)?;
+        destination.push(format!("{}.epub", title));
+        common::copy(&ebook.path, &destination)?;
+        Ok(())
     }
 }
