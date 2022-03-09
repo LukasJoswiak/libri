@@ -32,18 +32,24 @@ impl UsbDevice for Libra2 {
     }
 
     // TODO: Add option to auto-convert epubs to kepubs!
-    fn upload_ebook(&self, ebook: &Ebook) -> Result<(), Box<dyn Error>> {
+    fn upload_ebook(&self, ebook: &Ebook, dry_run: bool) -> Result<(), Box<dyn Error>> {
         // TODO: Factor out any common logic that can be reused across devices
         let author = common::sanitize(&ebook.author);
         let title = common::sanitize(&ebook.title);
 
         let mut destination = self.mount_dir().to_path_buf();
-        // TODO: Use current ebook path instead of rebuilding it (but remember to trim off the
-        // beginning)
         destination.push(format!("{}/{}", author, title));
-        fs::create_dir_all(&destination)?;
-        destination.push(format!("{}.epub", title));
-        common::copy(&ebook.path, &destination)?;
+        if destination.exists() {
+            return Err("already on device".into());
+        }
+
+        if !dry_run {
+            // TODO: Use current ebook path instead of rebuilding it (but remember to trim off the
+            // beginning)
+            fs::create_dir_all(&destination)?;
+            destination.push(format!("{}.epub", title));
+            common::copy(&ebook.path, &destination)?;
+        }
         Ok(())
     }
 }

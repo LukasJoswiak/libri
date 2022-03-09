@@ -16,7 +16,7 @@ pub trait UsbDevice {
 
     /// Uploads the specified ebook to the correct location on the device such that it will be
     /// recognized automatically.
-    fn upload_ebook(&self, ebook: &Ebook) -> Result<(), Box<dyn Error>>;
+    fn upload_ebook(&self, ebook: &Ebook, dry_run: bool) -> Result<(), Box<dyn Error>>;
 }
 
 impl fmt::Debug for dyn UsbDevice {

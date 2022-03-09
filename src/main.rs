@@ -18,7 +18,9 @@ enum AppArgs {
         move_books: bool,
         dry_run: bool,
     },
-    Upload {},
+    Upload {
+        dry_run: bool,
+    },
     Device(Device),
 }
 
@@ -59,7 +61,9 @@ fn run(args: Arguments, config_dir: Option<&Path>) -> Result<(), Box<dyn Error>>
                 move_books,
                 dry_run,
             ),
-            AppArgs::Upload {} => libri::upload::run(&libri::config::read(config_dir)?),
+            AppArgs::Upload { dry_run } => {
+                libri::upload::run(&libri::config::read(config_dir)?, dry_run)
+            }
             AppArgs::Device(subcommand) => match subcommand {
                 Device::List {} => libri::device::list::run(),
             },
@@ -107,8 +111,11 @@ fn parse_args(mut args: Arguments) -> Result<AppArgs, Box<dyn Error>> {
                 println!("{}", UPLOAD_HELP);
                 process::exit(0);
             }
+            let upload = AppArgs::Upload {
+                dry_run: args.contains("--dry-run"),
+            };
             handle_extra_args(args.finish());
-            Ok(AppArgs::Upload {})
+            Ok(upload)
         }
         Some("device") => {
             if args.contains(["-h", "--help"]) {
@@ -210,6 +217,7 @@ USAGE:
 
 FLAGS:
   -h, --help            Print help information
+  --dry-run             Run without making any changes to the file system
 
 ARGS:
   PATH                  Path to import directory";
@@ -222,7 +230,8 @@ USAGE:
   libri upload
 
 FLAGS:
-  -h, --help            Print help information";
+  -h, --help            Print help information
+  --dry-run             Run without making any changes to the file system";
 
 const DEVICE_HELP: &str = "\
 libri-device

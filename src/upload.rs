@@ -1,10 +1,37 @@
 use std::error::Error;
+use std::fmt;
+use std::time::{Duration, Instant};
 
 use super::config;
 use super::device;
 use super::list;
 
-pub fn run(config: &config::Config) -> Result<(), Box<dyn Error>> {
+struct UploadStats {
+    uploaded: u32,
+    skipped: u32,
+    elapsed: Duration,
+}
+
+impl fmt::Display for UploadStats {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "uploaded {}; skipped {}; finished in {:.2}s",
+            self.uploaded,
+            self.skipped,
+            self.elapsed.as_secs_f32()
+        )
+    }
+}
+
+pub fn run(config: &config::Config, dry_run: bool) -> Result<(), Box<dyn Error>> {
+    let mut stats = UploadStats {
+        uploaded: 0,
+        skipped: 0,
+        elapsed: Duration::ZERO,
+    };
+    let start = Instant::now();
+
     let available_devices = device::available_devices()?;
     // TODO: Filter devices based on user predicates
     if available_devices.len() == 0 {
@@ -20,11 +47,28 @@ pub fn run(config: &config::Config) -> Result<(), Box<dyn Error>> {
         return Ok(());
     }
     available_devices.iter().for_each(|device| {
+        println!("{}", device.name());
         ebooks.iter().for_each(|ebook| {
-            device.upload_ebook(&ebook).unwrap();
-            println!("uploaded {} to {}", &ebook.title, device.name());
-        })
+            match device.upload_ebook(&ebook, dry_run) {
+                Ok(_) => {
+                    stats.uploaded += 1;
+                    println!("uploaded \"{}\"", &ebook.title);
+                }
+                // TODO: Create custom error to differentiate between skipped titles vs IO
+                // errors
+                Err(e) => {
+                    stats.skipped += 1;
+                    println!("skipping \"{}\" -- {}", &ebook.title, e);
+                }
+            }
+        });
+        println!();
     });
-    // TODO: Add statistics, similar to `libri import`
+    stats.elapsed = start.elapsed();
+    print!("{}", stats);
+    if dry_run {
+        print!("; dry run");
+    }
+    println!();
     Ok(())
 }

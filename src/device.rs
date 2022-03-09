@@ -34,8 +34,8 @@ impl Device {
         &self.manufacturer
     }
 
-    pub fn upload_ebook(&self, ebook: &Ebook) -> Result<(), Box<dyn Error>> {
-        self.usb_info.upload_ebook(&ebook)
+    pub fn upload_ebook(&self, ebook: &Ebook, dry_run: bool) -> Result<(), Box<dyn Error>> {
+        self.usb_info.upload_ebook(&ebook, dry_run)
     }
 }
 
