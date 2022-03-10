@@ -1,5 +1,5 @@
-use std::error::Error;
 use std::fs;
+use std::io;
 use std::path::{Path, PathBuf};
 
 use super::super::{common, Ebook};
@@ -32,7 +32,7 @@ impl UsbDevice for Libra2 {
     }
 
     // TODO: Add option to auto-convert epubs to kepubs!
-    fn upload_ebook(&self, ebook: &Ebook, dry_run: bool) -> Result<(), Box<dyn Error>> {
+    fn upload_ebook(&self, ebook: &Ebook, dry_run: bool) -> Result<(), io::Error> {
         // TODO: Factor out any common logic that can be reused across devices
         let author = common::sanitize(&ebook.author);
         let title = common::sanitize(&ebook.title);
@@ -40,7 +40,7 @@ impl UsbDevice for Libra2 {
         let mut destination = self.mount_dir().to_path_buf();
         destination.push(format!("{}/{}", author, title));
         if destination.exists() {
-            return Err("already on device".into());
+            return Err(io::Error::new(io::ErrorKind::AlreadyExists, "already on device").into());
         }
 
         if !dry_run {

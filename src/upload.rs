@@ -48,20 +48,18 @@ pub fn run(config: &config::Config, dry_run: bool) -> Result<(), Box<dyn Error>>
     }
     available_devices.iter().for_each(|device| {
         println!("{}", device.name());
-        ebooks.iter().for_each(|ebook| {
-            match device.upload_ebook(&ebook, dry_run) {
+        ebooks
+            .iter()
+            .for_each(|ebook| match device.upload_ebook(&ebook, dry_run) {
                 Ok(_) => {
                     stats.uploaded += 1;
                     println!("uploaded \"{}\"", &ebook.title);
                 }
-                // TODO: Create custom error to differentiate between skipped titles vs IO
-                // errors
                 Err(e) => {
                     stats.skipped += 1;
                     println!("skipping \"{}\" -- {}", &ebook.title, e);
                 }
-            }
-        });
+            });
         println!();
     });
     stats.elapsed = start.elapsed();

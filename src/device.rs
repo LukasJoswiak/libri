@@ -4,6 +4,7 @@ pub mod list;
 mod usb;
 
 use std::error::Error;
+use std::io;
 use std::path::PathBuf;
 
 use super::Ebook;
@@ -34,7 +35,7 @@ impl Device {
         &self.manufacturer
     }
 
-    pub fn upload_ebook(&self, ebook: &Ebook, dry_run: bool) -> Result<(), Box<dyn Error>> {
+    pub fn upload_ebook(&self, ebook: &Ebook, dry_run: bool) -> Result<(), io::Error> {
         self.usb_info.upload_ebook(&ebook, dry_run)
     }
 }
