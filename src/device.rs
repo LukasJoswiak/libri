@@ -5,7 +5,7 @@ mod usb;
 
 use std::error::Error;
 use std::io;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use super::Ebook;
 use kobo::{Libra2, KOBO_VENDOR_ID, LIBRA_2_PRODUCT_ID};
@@ -35,8 +35,13 @@ impl Device {
         &self.manufacturer
     }
 
-    pub fn upload_ebook(&self, ebook: &Ebook, dry_run: bool) -> Result<(), io::Error> {
-        self.usb_info.upload_ebook(&ebook, dry_run)
+    pub fn upload_ebook(
+        &self,
+        ebook: &Ebook,
+        library: &Path,
+        dry_run: bool,
+    ) -> Result<(), io::Error> {
+        self.usb_info.upload_ebook(&ebook, &library, dry_run)
     }
 }
 
